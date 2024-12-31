@@ -1,0 +1,4 @@
+.env
+heroic-*.json
+credentials.json
+node_modules/
