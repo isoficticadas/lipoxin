@@ -4,30 +4,30 @@ const phonePattern = /^\+593\d{9}$/;
 
 /**
  * Muestra un mensaje de validación al usuario.
- * Actualmente usa un alert, pero puedes cambiarlo por un modal, etc.
- * @param {string} msg - Mensaje a mostrar
+ * Puedes reemplazar `alert` por cualquier implementación como modales personalizados.
+ * @param {string} msg - Mensaje a mostrar.
  */
 function showValidationMessage(msg) {
   alert(msg);
 }
 
 /**
- * Maneja el envío de un formulario, validando nombre y teléfono.
- * @param {string} formSelector - Selector CSS del formulario (ej: "#dataForm")
- * @param {string} nameSelector - Selector CSS del input de nombre (ej: "#name")
- * @param {string} phoneSelector - Selector CSS del input de teléfono (ej: "#phone")
+ * Maneja el envío de un formulario con validación previa.
+ * @param {string} formSelector - Selector CSS del formulario.
+ * @param {string} nameSelector - Selector CSS del input de nombre.
+ * @param {string} phoneSelector - Selector CSS del input de teléfono.
  */
 function handleFormSubmit(formSelector, nameSelector, phoneSelector) {
   const form = document.querySelector(formSelector);
-  if (!form) return; // Evita errores si el formulario no existe
+  if (!form) return; // Salir si el formulario no existe
 
-  form.addEventListener("submit", function (event) {
-    event.preventDefault(); // Evita el comportamiento por defecto (recargar la página)
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault(); // Evita recargar la página
 
     const nameInput = document.querySelector(nameSelector);
     const phoneInput = document.querySelector(phoneSelector);
 
-    // Verifica que existan los campos para evitar errores
+    // Salir si los inputs no existen
     if (!nameInput || !phoneInput) return;
 
     const name = nameInput.value.trim();
@@ -48,87 +48,85 @@ function handleFormSubmit(formSelector, nameSelector, phoneSelector) {
       return;
     }
 
-    // Envío de datos con Fetch
-    fetch("/submit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name, phone }),
-    })
-      .then((response) => {
-        // Comprobamos si la respuesta es exitosa (2xx)
-        if (!response.ok) {
-          throw new Error("Error en la respuesta del servidor");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        // data contendrá el JSON que devuelve el servidor
-        showValidationMessage("Datos enviados correctamente.");
-        form.reset();
-        // Oculta el popup si está abierto
-        const popupWindow = document.querySelector(".popup-window");
-        if (popupWindow) {
-          popupWindow.style.display = "none";
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        showValidationMessage("Error al enviar datos.");
+    try {
+      // Envío de datos con Fetch
+      const response = await fetch("/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, phone }),
       });
+
+      if (!response.ok) {
+        throw new Error("Error en la respuesta del servidor");
+      }
+
+      const data = await response.json();
+      showValidationMessage("Sus datos fueron enviados y un agente se comunicará con usted dentro de 1 a 5 minutos.");
+      form.reset();
+
+      // Ocultar ventana emergente si existe
+      const popupWindow = document.querySelector(".popup-window");
+      if (popupWindow) popupWindow.style.display = "none";
+    } catch (error) {
+      console.error(error);
+      showValidationMessage("Error al enviar datos.");
+    }
   });
 }
 
 /**
- * Inicializa la lógica de apertura/cierre del popup
+ * Inicializa la lógica de apertura y cierre del popup.
  */
 function initPopup() {
   const feedbackBtn = document.querySelector(".feedback");
   const closePopupBtn = document.querySelector(".close-popup");
   const popupWindow = document.querySelector(".popup-window");
 
-  // Mostrar popup
   if (feedbackBtn && popupWindow) {
-    feedbackBtn.addEventListener("click", function () {
+    feedbackBtn.addEventListener("click", () => {
       popupWindow.style.display = "block";
     });
   }
 
-  // Cerrar popup
   if (closePopupBtn && popupWindow) {
-    closePopupBtn.addEventListener("click", function () {
+    closePopupBtn.addEventListener("click", () => {
       popupWindow.style.display = "none";
     });
   }
 }
 
 /**
- * Se ejecuta cuando el DOM está listo
+ * Maneja la navegación entre secciones con desplazamiento suave.
  */
-document.addEventListener("DOMContentLoaded", function () {
+function initNavigation() {
+  const links = document.querySelectorAll(".navigate");
+  links.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const targetId = link.getAttribute("data-target");
+      const targetForm = document.getElementById(targetId);
+
+      if (targetForm) {
+        targetForm.style.display = "block";
+        targetForm.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  });
+}
+
+/**
+ * Inicializa las funcionalidades cuando el DOM está listo.
+ */
+document.addEventListener("DOMContentLoaded", () => {
   // Manejo de formularios
   handleFormSubmit("#dataForm", "#name", "#phone");
   handleFormSubmit("#dataForm2", "#name2", "#phone2");
   handleFormSubmit("#dataForm3", "#name3", "#phone3");
 
-  // Manejo de navegación
-  const links = document.querySelectorAll(".navigate");
-  links.forEach((link) => {
-    link.addEventListener("click", (event) => {
-      event.preventDefault(); // Evita el comportamiento predeterminado
-
-      // Muestra el formulario objetivo
-      const targetId = link.getAttribute("data-target");
-      const targetForm = document.getElementById(targetId);
-
-      if (targetForm) {
-        targetForm.style.display = "block"; // Muestra el formulario
-        targetForm.scrollIntoView({ behavior: "smooth" }); // Desplazamiento suave
-      }
-    });
-  });
-
-  // Inicializa el popup
+  // Inicializa navegación y popup
+  initNavigation();
   initPopup();
 });
