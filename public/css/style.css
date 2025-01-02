@@ -968,3 +968,43 @@ select {
     font-size: 14px;
   }
 }
+
+
+/* section header */
+.section-header {
+  background-color: #FF2E49;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 10px;
+}
+.header__content {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  gap: 0.7rem;
+}
+.header__logo {
+  height: 60px;
+  width: fit-content;
+}
+.header__heading {
+  color: #FFF;
+  text-align: center;
+  font-size: 25px;
+}
+.header__heading span {
+  color: inherit;
+}
+@media screen and (max-width: 900px) {
+  .header__heading {
+    font-size: 16px;
+  }
+}
+
