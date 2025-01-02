@@ -976,7 +976,7 @@ select {
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 10px;
+  padding: 3px;
 }
 .header__content {
   display: -webkit-box;
@@ -991,7 +991,7 @@ select {
   gap: 0.7rem;
 }
 .header__logo {
-  height: 60px;
+  height: 75px;
   width: fit-content;
 }
 .header__heading {
